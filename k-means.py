@@ -23,8 +23,8 @@ class ImageCompressor(Frame):
         # canvas for controls and information
         c_graphics = Canvas(self, width=400, height=300, bg="#273357", bd=5, relief="ridge")
         c_graphics.grid(column=0, row=0, columnspan=2)
-        c_functions = Canvas(c_graphics, width=400, height=50, bg="#273357")
-        c_functions.grid(column=0, row=0, columnspan=5)
+        c_functions = Canvas(c_graphics, width=400, height=50, bg="#273357", bd=5, relief="ridge", highlightthickness=0)
+        c_functions.grid(column=0, row=0, columnspan=5, pady=3)
 
         # K value input
         k_label = Label(c_functions, text="K: ", font=font, bd=2, relief="solid", bg="#991b00", fg="white")
