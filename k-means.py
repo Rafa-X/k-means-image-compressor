@@ -18,21 +18,30 @@ class ImageCompressor(Frame):
         self.compressed_filename = ''
         self.centroids = None
 
-        # controls for select and compress functions
-        c_functions = Canvas(self, width=100, height=300, bg="gray", bd=5, relief="ridge")
+        # canvas for controls and information
+        c_functions = Canvas(self, width=100, height=300, bg="#273357", bd=5, relief="ridge")
         c_functions.grid(column=0, row=0, columnspan=2)
 
-        button_select = Button(c_functions, text="Select Image", command=self.open_file, font=font)
+        # K value input
+        k_label = Label(c_functions, text="K: ", font=font, bd=2, relief="solid", bg="#991b00", fg="white")
+        k_label.grid(column=2, row=0, pady=10, sticky="e")
+        default = StringVar()
+        default.set("16")  # default value for K -> 16 colours to be compressed
+        k_value = Entry(c_functions, font=font, bd=2, relief="solid", width=5, textvariable=default)
+        k_value.grid(column=3, row=0, pady=10, sticky="w")
+
+        # controls for select and k-means compress functions
+        button_select = Button(c_functions, text="Select Image", command=self.open_file, font=font, bd=2, relief="solid")
         button_select.grid(column=1, row=0, padx=10, pady=10)
 
-        button_compress = Button(c_functions, text="Compress Image", command=lambda:self.compress_image(16), font=font)
-        button_compress.grid(column=1, row=1, pady=10)
+        button_compress = Button(c_functions, text="Compress Image", command=lambda:self.compress_image(int(k_value.get())), font=font, bd=2, relief="solid")
+        button_compress.grid(column=1, row=1, pady=10) 
 
         # labels for images sizes
         self.size_original = Label(c_functions, text="Size: ", font=font, bd=2, relief="solid", width=20, anchor="w")
         self.size_original.grid(column=0, row=1, padx=(15, 100))
         self.size_compressed = Label(c_functions, text="Size: ", font=font, bd=2, relief="solid", width=20, anchor="w")
-        self.size_compressed.grid(column=2, row=1, padx=(100, 15))
+        self.size_compressed.grid(column=2, row=1, padx=(100, 15), columnspan=2)
 
         # canvas for original and compressed image
         self.canvas_original = Canvas(self, width=500, height=500, bg="gray", bd=5, relief="ridge")
