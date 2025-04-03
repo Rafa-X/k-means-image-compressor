@@ -5,6 +5,8 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter.font import Font
 from PIL import Image, ImageTk
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class ImageCompressor(Frame):
     def __init__(self, main):
@@ -17,10 +19,12 @@ class ImageCompressor(Frame):
         self.filename = ''  # image paths 
         self.compressed_filename = ''
         self.centroids = None
+        self.palette_original = None
 
         # canvas for controls and information
-        c_functions = Canvas(self, width=100, height=300, bg="#273357", bd=5, relief="ridge")
+        c_functions = Canvas(self, width=400, height=300, bg="#273357", bd=5, relief="ridge")
         c_functions.grid(column=0, row=0, columnspan=2)
+
 
         # K value input
         k_label = Label(c_functions, text="K: ", font=font, bd=2, relief="solid", bg="#991b00", fg="white")
@@ -37,6 +41,19 @@ class ImageCompressor(Frame):
         button_compress = Button(c_functions, text="Compress Image", command=lambda:self.compress_image(int(k_value.get())), font=font, bd=2, relief="solid")
         button_compress.grid(column=1, row=1, pady=10) 
 
+        button_show_palette_original = Button(c_functions, text="Show Palette Original", command=lambda:self.show_palette(self.palette_original), font=font, bd=2, relief="solid")
+        button_show_palette_original.grid(column=0, row=2, padx=10, pady=20, sticky="e")
+
+        button_show_palette_compress = Button(c_functions, text="Show Palette Compressed", command=lambda:self.show_palette(self.centroids), font=font, bd=2, relief="solid")
+        button_show_palette_compress.grid(column=3, row=2, padx=10, pady=20, sticky="e")
+
+        button_show_grafhic_color = Button(c_functions, text="Show Grafhic Color", command=lambda:self.show_grafhics_colors(self.palette_original), font=font, bd=2, relief="solid")
+        button_show_grafhic_color.grid(column=1, row=2, padx=10, pady=20, sticky="e")
+
+        button_show_clusters = Button(c_functions, text="Show Clusters", command=lambda:self.show_clusters(int(k_value.get())), font=font, bd=2, relief="solid")
+        button_show_clusters.grid(column=2, row=2, padx=10, pady=20, sticky="e")
+
+
         # labels for images sizes
         self.size_original = Label(c_functions, text="Size: ", font=font, bd=2, relief="solid", width=20, anchor="w")
         self.size_original.grid(column=0, row=1, padx=(15, 100))
@@ -49,6 +66,7 @@ class ImageCompressor(Frame):
         self.canvas_compressed = Canvas(self, width=500, height=500, bg="gray", bd=5, relief="ridge")
         self.canvas_compressed.grid(column=1, row=1)
 
+    #------------------------ File functions ---------------------
     def open_file(self):
         self.filename = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
         if not self.filename:
@@ -73,12 +91,16 @@ class ImageCompressor(Frame):
         new_size = (int(width * scale), int(height * scale))
         image = image.resize(new_size, Image.Resampling.LANCZOS)
 
+        # Get palette of the image
+        self.palette_original = self.get_palette(image)
+
         # convert the image into a Photo copmatible with Tkinter
         tk_image = ImageTk.PhotoImage(image)
         canvas.delete("all")
         canvas.create_image(500//2, 500//2, image=tk_image, anchor="center")  # load into canvas
         canvas.image = tk_image  # prevents to erase the image reference 
     
+    # ------------------------ K-Means functions ---------------------
     def initialize_centroids(self, image, K):
         """Selects K random pixels from the image to be the initial centroids"""
         num_pixels = image.shape[0]
@@ -110,12 +132,82 @@ class ImageCompressor(Frame):
 
         return centroids, closest_centroids
     
+    #------------------------ Image reconstruction ---------------------
     def reconstruct_image(self, closest_centroids, centroids, original_shape):
         """Replaces each pixel in the image with its assigned centroid color"""
         compressed_image = centroids[closest_centroids]
         compressed_image = np.reshape(compressed_image, original_shape)
         return np.clip(compressed_image.astype(np.uint8), 0, 255)
     
+    #------------------------ Palette generation ---------------------
+    def get_palette(self, image = None):
+        image = cv2.imread(self.filename)  #loads the image
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  #convert BGR to RGB
+        image_flattened = image.reshape(-1, 3)  # convert to a list of pixels [R,G,B]
+
+        unique_colors = {tuple(color) for color in image_flattened}
+        color_palette = np.array(list(unique_colors), dtype=np.uint8)
+
+        return color_palette
+
+    #------------------------ Show Grafhics functions ---------------------
+    def show_palette(self, palette):
+        fig = plt.figure(figsize=(10, 2))
+
+        plt.imshow([palette / 255])
+        plt.title(f"PALETA DE COLORES \nNumero de colores: {palette.shape[0]} \n")
+        plt.axis("off")  # Ocultar ejes para enfocarse en los colores
+        plt.show()
+    
+    def show_clusters(self, k):
+        centroids, closest_centroids = self.k_means(self.palette_original, k)
+
+        fig = plt.figure(figsize=(7, 7))
+        ax = fig.add_subplot(111, projection='3d')
+
+        for i in range(k):
+            ax.scatter(
+                self.palette_original[closest_centroids == i, 0],
+                self.palette_original[closest_centroids == i, 1],
+                self.palette_original[closest_centroids == i, 2], 
+                s=30, label=f'Cluster {i}'
+            )
+
+            ax.scatter(
+                centroids[:, 0], 
+                centroids[:, 1], 
+                centroids[:, 2],
+                c='red', marker='x', s=100, label=f'Centroide  {i}'
+            )
+
+        ax.set_xlabel('Rojo (Red)')
+        ax.set_ylabel('Verde (Green)')
+        ax.set_zlabel('Azul (Blue)')
+        ax.legend()
+        plt.title("Clusters generados por K-Means")
+        plt.show()
+    
+    def show_grafhics_colors(self, palette):
+        reds = []
+        greens = []
+        blues = []
+
+        for color in palette:
+            reds.append(color[0])
+            greens.append(color[1])
+            blues.append(color[2])
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        ax.scatter(reds, greens, blues, c=palette/255, s=100)
+        ax.set_xlabel('Rojo (R)')
+        ax.set_ylabel('Verde (G)')
+        ax.set_zlabel('Azul (B)')
+        plt.title("Distribución de colores en espacio RGB")
+        plt.show()
+    
+    #------------------------ Image compression ---------------------
     def compress_image(self, K):
         """ Loads an image, applies K-Means compression, and displays results"""
         image = cv2.imread(self.filename)  #loads the image
@@ -125,13 +217,13 @@ class ImageCompressor(Frame):
         
         # build the image with the located centroids
         self.centroids, closest_centroids = self.k_means(image_flattened, K)
+
         compressed_image = self.reconstruct_image(closest_centroids, self.centroids, original_shape)
         
         # save the image and load it in the IU
         self.save_as_compressed_jpg(compressed_image)
         self.load_image_canvas(self.canvas_compressed, self.compressed_filename)
         self.size_compressed.config(text="Tamaño: " + str(os.path.getsize(self.compressed_filename)) + " bytes")  
-        
 
 if __name__ == '__main__':
     main = Tk()
