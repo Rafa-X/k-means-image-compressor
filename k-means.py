@@ -55,14 +55,6 @@ class ImageCompressor(Frame):
         img = Image.fromarray(image_array).convert('RGB')
         img.save(self.compressed_filename, 'JPEG', quality=85)  #save the image as a .jpg
 
-        """original_size = os.path.getsize(self.filename)
-        compressed_size = os.path.getsize(self.compressed_filename)
-        
-        while compressed_size >= original_size and quality > 20:
-            quality -= 10
-            img.save(self.compressed_filename, 'JPEG', quality=quality)
-            compressed_size = os.path.getsize(self.compressed_filename)"""
-
     def load_image_canvas(self, canvas, filename):
         image = Image.open(filename)  # loads the image
         width, height = image.size    # get its dimensions
