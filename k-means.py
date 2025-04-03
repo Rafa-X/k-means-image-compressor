@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 class ImageCompressor(Frame):
     def __init__(self, main):
         super().__init__(main)
-        main.title("Compresión de Imagen con K-Means")
+        main.title("K-Means Image Compressor")
         main.geometry("1060x660")
         self.grid(sticky="n")
         font = Font(family="Consolas", size=11) 
