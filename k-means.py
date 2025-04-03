@@ -6,6 +6,7 @@ from tkinter import filedialog, messagebox
 from tkinter.font import Font
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class ImageCompressor(Frame):
     def __init__(self, main):
@@ -44,7 +45,7 @@ class ImageCompressor(Frame):
         button_show_palette_original = Button(c_graphics, text="Show Palette", command=lambda:self.show_palette(self.palette_original, self.centroids), font=font, bd=2, relief="solid")
         button_show_palette_original.grid(column=0, row=1, padx=10, pady=10, sticky="e")
 
-        button_show_grafhic_color = Button(c_graphics, text="Show Graphic Color", command=lambda:self.show_grafhics_colors(self.palette_original), font=font, bd=2, relief="solid")
+        button_show_grafhic_color = Button(c_graphics, text="Show Graphic Color", command=lambda:self.show_grafhics_colors(self.palette_original, self.centroids), font=font, bd=2, relief="solid")
         button_show_grafhic_color.grid(column=1, row=1, padx=10, pady=10)
 
         button_show_clusters = Button(c_graphics, text="Show Clusters", command=lambda:self.show_clusters(int(k_value.get())), font=font, bd=2, relief="solid")
@@ -166,30 +167,18 @@ class ImageCompressor(Frame):
         return color_palette
 
     #------------------------ Show Grafhics functions ---------------------
-    """def show_palette(self, palette_original, palete_compressed):
-        fig = plt.figure(figsize=(10, 2))
-
-        plt.imshow([palette_original / 255])
-        plt.title(f"PALETA DE COLORES \nNumero de colores: {palette_original.shape[0]} \n")
-        plt.axis("off")  # Ocultar ejes para enfocarse en los colores
-
-        plt.imshow([palete_compressed / 255])
-        plt.title(f"PALETA DE COLORES \nNumero de colores: {palete_compressed.shape[0]} \n")
-        plt.axis("off")  # Ocultar ejes para enfocarse en los colores
-        plt.show()"""
-
     def show_palette(self, palette_original, palette_compressed):
         fig, axes = plt.subplots(1, 2, figsize=(10, 2))  # Crear dos subgráficos en una fila
 
-        # Mostrar la paleta original
+        # show the original palette
         axes[0].imshow([palette_original / 255])
         axes[0].set_title(f"PALETA DE COLORES ORIGINAL \nNúmero de colores: {palette_original.shape[0]} \n")
-        axes[0].axis("off")  # Ocultar ejes
+        axes[0].axis("off")  # hides the edges
 
-        # Mostrar la paleta comprimida
+        # show the compressed palette
         axes[1].imshow([palette_compressed / 255])
         axes[1].set_title(f"PALETA DE COLORES K-MEANS \nNúmero de colores: {palette_compressed.shape[0]} \n")
-        axes[1].axis("off")  # Ocultar ejes
+        axes[1].axis("off")  # hides the edges
 
         plt.show()
     
@@ -220,26 +209,31 @@ class ImageCompressor(Frame):
         ax.legend()
         plt.title("Clusters generados por K-Means")
         plt.show()
-    
-    def show_grafhics_colors(self, palette):
-        reds = []
-        greens = []
-        blues = []
 
-        for color in palette:
-            reds.append(color[0])
-            greens.append(color[1])
-            blues.append(color[2])
+    def show_grafhics_colors(self, original, compressed):
+        # muestra dos gráficos 3D en una ventana de Matplotlib
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), subplot_kw={'projection': '3d'})
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        # dibuja la paleta original
+        self.plot_colors(ax1, original, "Original")
 
-        ax.scatter(reds, greens, blues, c=palette/255, s=100)
+        # dibuja la paleta comprimida
+        self.plot_colors(ax2, compressed, "Comprimida")
+
+        plt.show()
+
+    def plot_colors(self, ax, palette, title):
+        # dibuja la distribución de colores en el eje 3D dado
+        ax.clear()
+        reds = [color[0] for color in palette]
+        greens = [color[1] for color in palette]
+        blues = [color[2] for color in palette]
+
+        ax.scatter(reds, greens, blues, c=np.array(palette) / 255, s=100)
         ax.set_xlabel('Rojo (R)')
         ax.set_ylabel('Verde (G)')
         ax.set_zlabel('Azul (B)')
-        plt.title("Distribución de colores en espacio RGB")
-        plt.show()
+        ax.set_title(f"Distribución de colores - {title}")
     
 
 if __name__ == '__main__':
