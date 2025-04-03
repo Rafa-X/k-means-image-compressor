@@ -28,9 +28,6 @@ class ImageCompressor(Frame):
         button_compress = Button(c_functions, text="Compress Image", command=lambda:self.compress_image(16), font=font)
         button_compress.grid(column=1, row=1, pady=10)
 
-        button_highlight = Button(c_functions, text="Emphasize Centroids", command=self.highlight_centroids, font=font)
-        button_highlight.grid(column=1, row=2, pady=10)
-
         # labels for images sizes
         self.size_original = Label(c_functions, text="Size: ", font=font, bd=2, relief="solid", width=20, anchor="w")
         self.size_original.grid(column=0, row=1, padx=(15, 100))
