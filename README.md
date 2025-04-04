@@ -1,5 +1,5 @@
 # K-Means Image Compressor
-Using the Machine Learning algorithm K-Means, applies clustering to reduce the number of colors in an image, effectively compressing it while preserving visual quality. <br><br>
+Using the Machine Learning algorithm K-Means, applies clustering to reduce the number of colors in an image, effectively compressing it while preserving visual quality. <br>
 
 This project demonstrates the power of clustering algorithms in image processing, optimizing storage while maintaining a visually recognizable output. <br><br>
 
@@ -22,4 +22,4 @@ k-means reduce the amount of colors using a indexed color palette format
 | --------------------- | ---------- | 
 | Show Palette          | Quantity of colours in the original image and compressed image <br><br><p align="center" style="margin-bottom: 0px !important;"> <img width=90% src="images/show_palette.png" align="center"> </p> |
 | Show Graphic Color    |  <br><br><p align="center" style="margin-bottom: 0px !important;"> <img width=90% src="images/show_graphic_color.png" align="center"> </p> |
-| Show Clusters         |  <br><br><p align="center" style="margin-bottom: 0px !important;"> <img width=90% src="images/clusters.png" align="center"> </p> |
+| Show Clusters         |  <br><br><p align="center" style="margin-bottom: 0px !important;"> <img width=70% src="images/clusters.png" align="center"> </p> |
